@@ -1,0 +1,19 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: "${APP_NAME}"
+  namespace: "${K8S_NAMESPACE}"
+  labels:
+    app: "${K8S_APP}"
+    name: "${APP_NAME}"
+    tier: "${K8S_TIER}"
+    version: "${APP_VERSION}"
+spec:
+  ports:
+  - port: 80
+    targetPort: ${K8S_PORT}
+  selector:
+    app: "${K8S_APP}"
+    name: "${APP_NAME}"
+    tier: "${K8S_TIER}"

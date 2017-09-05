@@ -1,0 +1,23 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "${APP_NAME}"
+  namespace: "${K8S_NAMESPACE}"
+  labels:
+    app: "${K8S_APP}"
+    name: "${APP_NAME}"
+    tier: "${K8S_TIER}"
+    version: "${APP_VERSION}"
+  annotations:
+    traefik.frontend.rule.type: PathPrefix
+    traefik.frontend.entryPoints: https
+spec:
+  rules:
+  - host: "${APP_HOSTNAME}"
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: "${APP_NAME}"
+          servicePort: 80

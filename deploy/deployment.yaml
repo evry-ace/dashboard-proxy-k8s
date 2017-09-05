@@ -1,0 +1,77 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "${APP_NAME}"
+  namespace: "${K8S_NAMESPACE}"
+  labels:
+    app: "${K8S_APP}"
+    name: "${APP_NAME}"
+    tier: "${K8S_TIER}"
+    version: "${APP_VERSION}"
+spec:
+  replicas: ${K8S_REPLICAS}
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: "${K8S_APP}"
+      name: "${APP_NAME}"
+      tier: "${K8S_TIER}"
+  template:
+    metadata:
+      labels:
+        app: "${K8S_APP}"
+        name: "${APP_NAME}"
+        tier: "${K8S_TIER}"
+        version: "${APP_VERSION}"
+    spec:
+      containers:
+      - name: "${APP_NAME}"
+        image: "${APP_IMAGE}:${APP_VERSION}"
+        imagePullPolicy: IfNotPresent
+        args:
+        - "-email-domain=*"
+        - "-github-org=${OAUTH_GITHUB_ORG}"
+        - "-http-address=0.0.0.0:${K8S_PORT}"
+        - "-login-url=https://github.com/login/oauth/authorize"
+        - "-provider=github"
+        - "-redeem-url=https://github.com/login/oauth/access_token"
+        - "-skip-provider-button=true"
+        - "-upstream=http://${DASHBOARD_SERVICE_NAME}"
+        - "-validate-url=https://api.github.com"
+        ports:
+        - containerPort: ${K8S_PORT}
+          protocol: TCP
+          name: http
+        env:
+        - name: OAUTH2_PROXY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: clientId
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: clientSecret
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: cookieSecret
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
