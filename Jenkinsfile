@@ -4,12 +4,12 @@ properties([
   parameters([
     string(
       name: 'K8S_CLUSTER',
-      defaultValue: 'kubernetes.demo',
+      defaultValue: 'kubernetes.ace.dev',
       description: 'The Kubernetes Cluster you want to deploy to',
     ),
     string(
       name: 'APP_HOSTNAME',
-      defaultValue: 'dashboard.alpha.ace.evry.services',
+      defaultValue: 'dashboard.dev.ace.evry.services',
       description: 'The hostname you want to access the app over',
     ),
     string(
