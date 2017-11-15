@@ -12,6 +12,21 @@ properties([
       defaultValue: 'dashboard.alpha.ace.evry.services',
       description: 'The hostname you want to access the app over',
     ),
+    string(
+      name: 'OAUTH_GITHUB_ORG',
+      defaultValue: 'evry-bergen',
+      description: 'GitHub Organisation for OAuth authentication',
+    ),
+    string(
+      name: 'OAUTH_GITHUB_TEAM',
+      defaultValue: 'ace',
+      description: 'GitHub Team for OAuth authentication',
+    ),
+    string(
+      name: 'DASHBOARD_SERVICE_NAME',
+      defaultValue: 'kubernetes-dashboard',
+      description: 'Kubernetes Dashbaord Service Name',
+    ),
   ])
 ])
 
@@ -36,10 +51,17 @@ node('jenkins-docker-3') {
         [env: 'prod', regex: /^master$/],
       ]
 
-      config = new Config(this).branchProperties(envPatterns)
-      config.K8S_CLUSTER = env.K8S_CLUSTER
-      config.APP_HOSTNAME = env.APP_HOSTNAME
+      def config = new Config(this).branchProperties(envPatterns)
 
+      // Move Jenkins build parameters to git config properties
+      [ 'K8S_CLUSTER',
+        'APP_HOSTNAME',
+        'OAUTH_GITHUB_ORG',
+        'OAUTH_GITHUB_TEAM',
+        'DASHBOARD_SERVICE_NAME',
+      ].eachWithIndex { item, index -> config[item] = env[item] }
+
+      // Deploy to Kubernetes
       stage("Deploy") {
         def Boolean dryrun = config.JENKINS_DEPLOY != 'true'
 
